@@ -9,7 +9,28 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-produc
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000').split(',')
+# Always allow the known Railway domain
+_railway_domain = 'web-production-8400e.up.railway.app'
+if _railway_domain not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(_railway_domain)
+
+# CSRF — build trusted origins from ALLOWED_HOSTS and explicit env var
+_csrf_env = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_env.split(',') if o.strip()] if _csrf_env else []
+# Auto-add https:// origins for all allowed hosts (handles Railway domains)
+for host in ALLOWED_HOSTS:
+    host = host.strip()
+    if host and host != '*':
+        origin = f'https://{host}'
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
+        # Also add wildcard subdomain variant
+        if not host.startswith('.'):
+            wildcard = f'https://*.{host}'
+        else:
+            wildcard = f'https://*{host}'
+        if wildcard not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(wildcard)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
