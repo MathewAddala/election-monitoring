@@ -1,7 +1,6 @@
 from django import forms
 from .models import IssueReport
 
-# Shared CSS classes for form widgets
 INPUT_CSS = (
     'w-full px-4 py-3 bg-slate-900/80 border border-slate-600 rounded-xl '
     'text-white placeholder-slate-500 focus:outline-none focus:ring-2 '

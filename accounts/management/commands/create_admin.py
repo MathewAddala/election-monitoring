@@ -4,7 +4,6 @@ from accounts.models import CustomUser
 
 
 class Command(BaseCommand):
-    help = 'Create default admin user if none exists'
 
     def handle(self, *args, **options):
         if not CustomUser.objects.filter(role='admin').exists():

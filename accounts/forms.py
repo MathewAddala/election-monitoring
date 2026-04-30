@@ -2,7 +2,6 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 
-# Shared CSS classes for form widgets
 INPUT_CSS = (
     'w-full px-4 py-3 bg-slate-900/80 border border-slate-600 rounded-xl '
     'text-white placeholder-slate-500 focus:outline-none focus:ring-2 '
@@ -31,10 +30,15 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model  = CustomUser
-        fields = ['username', 'email', 'phone', 'password1', 'password2']
+        fields = ['username', 'email', 'phone', 'role', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['role'].choices = [
+            ('citizen',  'Citizen'),
+            ('observer', 'Election Observer'),
+        ]
+        self.fields['role'].widget.attrs['class'] = SELECT_CSS
         placeholders = {
             'username':  'Choose a username',
             'email':     'you@example.com',
@@ -43,6 +47,8 @@ class RegisterForm(UserCreationForm):
             'password2': 'Confirm your password',
         }
         for name, field in self.fields.items():
+            if name == 'role':
+                continue
             field.widget.attrs['class'] = INPUT_CSS
             if name in placeholders:
                 field.widget.attrs['placeholder'] = placeholders[name]
@@ -68,3 +74,13 @@ class ProfileForm(forms.ModelForm):
                 field.widget.attrs['class'] = INPUT_CSS
             if name in placeholders:
                 field.widget.attrs['placeholder'] = placeholders[name]
+
+
+class UserRoleForm(forms.ModelForm):
+    class Meta:
+        model  = CustomUser
+        fields = ['role']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['role'].widget.attrs['class'] = SELECT_CSS

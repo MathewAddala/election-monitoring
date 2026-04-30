@@ -9,22 +9,19 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-produc
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
-# Always allow the known Railway domain
+
 _railway_domain = 'web-production-8400e.up.railway.app'
 if _railway_domain not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(_railway_domain)
 
-# CSRF — build trusted origins from ALLOWED_HOSTS and explicit env var
 _csrf_env = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_env.split(',') if o.strip()] if _csrf_env else []
-# Auto-add https:// origins for all allowed hosts (handles Railway domains)
 for host in ALLOWED_HOSTS:
     host = host.strip()
     if host and host != '*':
         origin = f'https://{host}'
         if origin not in CSRF_TRUSTED_ORIGINS:
             CSRF_TRUSTED_ORIGINS.append(origin)
-        # Also add wildcard subdomain variant
         if not host.startswith('.'):
             wildcard = f'https://*.{host}'
         else:
@@ -47,7 +44,6 @@ INSTALLED_APPS = [
     'dashboard',
 ]
 
-# Add browser reload only in DEBUG mode
 if DEBUG:
     INSTALLED_APPS.append('django_browser_reload')
 
@@ -65,7 +61,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Add browser reload middleware only in DEBUG mode
 if DEBUG:
     MIDDLEWARE.append('django_browser_reload.middleware.BrowserReloadMiddleware')
 
@@ -89,8 +84,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'election_core.wsgi.application'
 
-# Database — Use DATABASE_URL env var in production (Railway auto-sets this),
-# fall back to local PostgreSQL for development
 DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://postgres:Vinaykumar%40%23%24_1@localhost:5432/election_db'
@@ -111,7 +104,6 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
 STATIC_URL = '/static/'
 _static_dir = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [_static_dir] if os.path.isdir(_static_dir) else []
@@ -122,7 +114,6 @@ STORAGES = {
     },
 }
 
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -132,5 +123,4 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# NPM path — only needed for local Tailwind development
 NPM_BIN_PATH = os.environ.get('NPM_BIN_PATH', r"C:\Program Files\nodejs\npm.cmd")

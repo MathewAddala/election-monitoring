@@ -21,7 +21,6 @@ def report_list(request):
 
 @login_required
 def report_create(request):
-    # Fix 4 — only citizens can file reports
     if not request.user.is_citizen:
         messages.error(request, 'Only citizens can file reports.')
         return redirect('reports:list')
@@ -38,7 +37,6 @@ def report_create(request):
 @login_required
 def report_detail(request, pk):
     report = get_object_or_404(IssueReport, pk=pk)
-    # Fix 3 — citizens can only see their own reports
     if request.user.is_citizen and report.citizen != request.user:
         messages.error(request, 'You can only view your own reports.')
         return redirect('reports:list')
@@ -53,7 +51,6 @@ def update_status(request, pk):
     report = get_object_or_404(IssueReport, pk=pk)
     if request.method == 'POST':
         new_status = request.POST.get('status', '')
-        # Fix 2 — validate against allowed values only
         if new_status in VALID_STATUSES:
             report.status = new_status
             report.save()
