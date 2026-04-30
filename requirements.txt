@@ -1,0 +1,8 @@
+Django==5.2.11
+django-browser-reload==1.21.0
+django-tailwind==4.2.0
+dj-database-url==3.1.2
+gunicorn==25.3.0
+pillow==11.2.1
+psycopg2-binary==2.9.11
+whitenoise==6.12.0

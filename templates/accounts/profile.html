@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+
+<div class="max-w-2xl mx-auto">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-white tracking-tight">My Profile</h1>
+    <p class="text-slate-500 mt-1 text-sm">Manage your personal information</p>
+  </div>
+
+  <!-- Avatar preview -->
+  <div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 mb-6 flex items-center gap-5">
+    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg shrink-0">
+      {{ user.username|first|upper }}
+    </div>
+    <div>
+      <p class="text-lg font-semibold text-white">{{ user.username }}</p>
+      <p class="text-sm text-slate-500">{{ user.get_role_display }} · {{ user.email }}</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 shadow-xl">
+    <form method="post" enctype="multipart/form-data" class="space-y-5" id="profile-form">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {% for field in form %}
+        <div class="{% if field.name == 'email' or field.name == 'avatar' %}sm:col-span-2{% endif %}">
+          <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-300 mb-2">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <p class="text-red-400 text-xs mt-1.5 font-medium">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="flex items-center gap-3 pt-3 border-t border-slate-800/60">
+        <button type="submit" id="profile-save-btn"
+                class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/20 hover:-translate-y-0.5">
+          Save Changes
+        </button>
+        <a href="{% url 'dashboard:home' %}" class="px-6 py-2.5 text-slate-400 hover:text-white font-medium text-sm transition-colors">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

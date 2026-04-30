@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<!-- ADMIN DASHBOARD -->
+{% if role == 'admin' %}
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-white tracking-tight">Admin Dashboard</h1>
+  <p class="text-slate-500 mt-1 text-sm">Welcome, {{ user.username }} — full system overview</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+  <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-900/40 border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-blue-200 text-xs font-semibold uppercase tracking-wider">Total Elections</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ total_elections }}</p>
+    <div class="flex gap-2 mt-4 text-xs font-medium text-blue-100">
+      <span class="bg-blue-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5">{{ ongoing }} Ongoing</span>
+      <span class="bg-blue-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5">{{ upcoming }} Upcoming</span>
+    </div>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-red-600 to-red-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-900/40 border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-red-200 text-xs font-semibold uppercase tracking-wider">Issue Reports</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ total_reports }}</p>
+    <div class="flex gap-2 mt-4 text-xs font-medium text-red-100">
+      <span class="bg-red-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5">{{ pending_reports }} Pending</span>
+      <span class="bg-red-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5">{{ high_severity }} High Risk</span>
+    </div>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-emerald-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-900/40 border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-emerald-200 text-xs font-semibold uppercase tracking-wider">Completed</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ completed }}</p>
+    <p class="text-xs text-emerald-200 mt-4 bg-emerald-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">elections concluded</p>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-violet-600 to-violet-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-900/40 border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">Citizens</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ total_citizens }}</p>
+    <p class="text-xs text-violet-200 mt-4 bg-violet-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">registered users</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 shadow-xl">
+    <h2 class="font-bold text-white mb-5 flex items-center gap-3 text-base">
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span> Recent Elections
+    </h2>
+    <div class="space-y-2">
+      {% for e in recent_elections %}
+      <a href="{% url 'elections:detail' e.pk %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-950/50 border border-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700 transition-all duration-150 group">
+        <div class="min-w-0 mr-3">
+          <p class="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{{ e.title }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ e.election_date }} · {{ e.location }}</p>
+        </div>
+        <span class="px-2.5 py-1 text-xs rounded-full font-semibold uppercase tracking-wider shrink-0
+          {% if e.status == 'ongoing' %} bg-green-500/10 text-green-400 border border-green-500/20
+          {% elif e.status == 'upcoming' %} bg-blue-500/10 text-blue-400 border border-blue-500/20
+          {% else %} bg-slate-500/10 text-slate-500 border border-slate-500/20 {% endif %}">
+          {{ e.get_status_display }}
+        </span>
+      </a>
+      {% empty %}
+      <p class="text-slate-600 text-sm text-center py-6">No elections yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 shadow-xl">
+    <h2 class="font-bold text-white mb-5 flex items-center gap-3 text-base">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span> Recent Reports
+    </h2>
+    <div class="space-y-2">
+      {% for r in recent_reports %}
+      <a href="{% url 'reports:detail' r.pk %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-950/50 border border-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700 transition-all duration-150 group">
+        <div class="min-w-0 mr-3">
+          <p class="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{{ r.title }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">by {{ r.citizen.username }}</p>
+        </div>
+        <span class="px-2.5 py-1 text-xs rounded-full font-semibold uppercase tracking-wider shrink-0
+          {% if r.severity == 'high' %} bg-red-500/10 text-red-400 border border-red-500/20
+          {% elif r.severity == 'medium' %} bg-amber-500/10 text-amber-400 border border-amber-500/20
+          {% else %} bg-slate-500/10 text-slate-500 border border-slate-500/20 {% endif %}">
+          {{ r.get_severity_display }}
+        </span>
+      </a>
+      {% empty %}
+      <p class="text-slate-600 text-sm text-center py-6">No reports yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- OBSERVER DASHBOARD -->
+{% elif role == 'observer' %}
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-white tracking-tight">Observer Dashboard</h1>
+  <p class="text-slate-500 mt-1 text-sm">Welcome, {{ user.username }} — monitoring election fairness</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+  <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-blue-200 text-xs font-semibold uppercase tracking-wider">Total Elections</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ total_elections }}</p>
+    <p class="text-xs text-blue-200 mt-4 bg-blue-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">{{ ongoing }} currently ongoing</p>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-800 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-amber-200 text-xs font-semibold uppercase tracking-wider">Pending Reports</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ pending_reports }}</p>
+    <p class="text-xs text-amber-200 mt-4 bg-amber-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">awaiting review</p>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-red-600 to-red-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-red-200 text-xs font-semibold uppercase tracking-wider">High Risk Reports</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ high_severity }}</p>
+    <p class="text-xs text-red-200 mt-4 bg-red-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">need urgent attention</p>
+  </div>
+</div>
+
+<div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 shadow-xl">
+  <h2 class="font-bold text-white mb-5 flex items-center gap-3 text-base">
+    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span> Reports Needing Review
+  </h2>
+  <div class="space-y-2">
+    {% for r in recent_reports %}
+    <a href="{% url 'reports:detail' r.pk %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-950/50 border border-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700 transition-all duration-150 group">
+      <div class="min-w-0 mr-3">
+        <p class="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{{ r.title }}</p>
+        <p class="text-xs text-slate-600 mt-0.5">{{ r.election.title }} · by {{ r.citizen.username }}</p>
+      </div>
+      <span class="px-2.5 py-1 text-xs rounded-full font-semibold uppercase tracking-wider shrink-0
+        {% if r.severity == 'high' %} bg-red-500/10 text-red-400 border border-red-500/20
+        {% elif r.severity == 'medium' %} bg-amber-500/10 text-amber-400 border border-amber-500/20
+        {% else %} bg-slate-500/10 text-slate-500 border border-slate-500/20 {% endif %}">
+        {{ r.get_severity_display }}
+      </span>
+    </a>
+    {% empty %}
+    <p class="text-slate-600 text-sm text-center py-6">No reports yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- CITIZEN DASHBOARD -->
+{% elif role == 'citizen' %}
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-white tracking-tight">My Dashboard</h1>
+  <p class="text-slate-500 mt-1 text-sm">Welcome, {{ user.username }} — track your reports and elections</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+  <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-blue-200 text-xs font-semibold uppercase tracking-wider">My Reports</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ my_reports }}</p>
+    <p class="text-xs text-blue-200 mt-4 bg-blue-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">total submitted</p>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-800 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-amber-200 text-xs font-semibold uppercase tracking-wider">Pending</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ my_pending }}</p>
+    <p class="text-xs text-amber-200 mt-4 bg-amber-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">awaiting review</p>
+  </div>
+  <div class="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-emerald-900 rounded-2xl p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border border-white/10">
+    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+    <p class="text-emerald-200 text-xs font-semibold uppercase tracking-wider">Resolved</p>
+    <p class="text-4xl font-extrabold text-white mt-2">{{ my_resolved }}</p>
+    <p class="text-xs text-emerald-200 mt-4 bg-emerald-950/50 backdrop-blur px-2.5 py-1 rounded-full border border-white/5 inline-block">issues closed</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 shadow-xl">
+    <h2 class="font-bold text-white mb-5 flex items-center gap-3 text-base">
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span> Upcoming Elections
+    </h2>
+    <div class="space-y-2">
+      {% for e in recent_elections %}
+      <a href="{% url 'elections:detail' e.pk %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-950/50 border border-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700 transition-all duration-150 group">
+        <div class="min-w-0 mr-3">
+          <p class="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{{ e.title }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ e.election_date }} · {{ e.location }}</p>
+        </div>
+        <span class="px-2.5 py-1 text-xs rounded-full font-semibold uppercase tracking-wider shrink-0
+          {% if e.status == 'ongoing' %} bg-green-500/10 text-green-400 border border-green-500/20
+          {% elif e.status == 'upcoming' %} bg-blue-500/10 text-blue-400 border border-blue-500/20
+          {% else %} bg-slate-500/10 text-slate-500 border border-slate-500/20 {% endif %}">
+          {{ e.get_status_display }}
+        </span>
+      </a>
+      {% empty %}
+      <p class="text-slate-600 text-sm text-center py-6">No elections yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-2xl p-6 shadow-xl">
+    <h2 class="font-bold text-white mb-5 flex items-center gap-3 text-base">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span> My Recent Reports
+    </h2>
+    <div class="space-y-2">
+      {% for r in my_recent_reports %}
+      <a href="{% url 'reports:detail' r.pk %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-950/50 border border-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700 transition-all duration-150 group">
+        <div class="min-w-0 mr-3">
+          <p class="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{{ r.title }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ r.election.title }}</p>
+        </div>
+        <span class="px-2.5 py-1 text-xs rounded-full font-semibold uppercase tracking-wider shrink-0
+          {% if r.status == 'resolved' %} bg-green-500/10 text-green-400 border border-green-500/20
+          {% elif r.status == 'reviewed' %} bg-blue-500/10 text-blue-400 border border-blue-500/20
+          {% else %} bg-slate-500/10 text-slate-500 border border-slate-500/20 {% endif %}">
+          {{ r.get_status_display }}
+        </span>
+      </a>
+      {% empty %}
+      <div class="text-center py-8">
+        <div class="w-12 h-12 mx-auto mb-4 bg-slate-800 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <p class="text-slate-600 text-sm mb-4">No reports filed yet</p>
+        <a href="{% url 'reports:create' %}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-lg hover:shadow-red-900/30 hover:-translate-y-0.5">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          File Your First Report
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
